@@ -3,18 +3,23 @@ var app = app || {};
 (function() {
     document.addEventListener("deviceready", function () {
         app.application = new kendo.mobile.Application(document.body, { layout: "tabstrip-layout" });
+        
+        var refresh1st = function() 
+        {
+            navigator.notification.vibrate(300);
+            app.home.refreshData();
+        }
+        shake.startWatch(refresh1st);
+        
     }, false);
-
-    app.changeSkin = function (e) {
-        if (e.sender.element.text() === "Flat") {
-            e.sender.element.text("Native");
-            mobileSkin = "flat";
-        }
-        else {
-            e.sender.element.text("Flat");
-            mobileSkin = "";
-        }
-
-        app.application.skin(mobileSkin);
-    };
+    
+    document.addEventListener("offline", function () {
+        app.globalViewModel.viewModel.isOffline = true;
+    }, false);
+    
+    document.addEventListener("online", function () {
+        app.globalViewModel.viewModel.isOffline = false;
+    }, false);
+    
+   
 }());

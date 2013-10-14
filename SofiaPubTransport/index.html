@@ -10,15 +10,15 @@
         <script src="cordova.js"></script>
         <script src="kendo/js/jquery.min.js"></script>
         <script src="kendo/js/kendo.all.min.js"></script>
-        <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true"></script>
 
-        <!--<script type="text/javascript" src="Plugins/com.phonegap.plugins.sqlite-0.0.4/www/SQLitePlugin.js"></script>-->
-
+        <script src="scripts/globalViewModel.js"></script>
+        <script src="scripts/shake.js"></script>
+        
         <script src="scripts/lib/rsvp.min.js"></script>
-
         <script src="scripts/sqlite.js"></script>
-
         <script src="scripts/data/httpRequest.js"></script>
+
+        <script src="scripts/getLocation.js"></script>
         <script src="scripts/transport.js"></script>
         <script src="scripts/history.js"></script>
 
@@ -29,7 +29,7 @@
         <!--Home-->
         <div id="tabstrip-home" 
              data-role="view"  
-             data-title="Home"
+             data-title="История"
              data-model="app.home.viewModel"  >
 
             <div class="weather" style="height: 100%;">
@@ -37,90 +37,61 @@
 
                 <ul class="forecast-list"
                     data-role="listview" 
-                    data-bind="source: history " 
-                    data-template = "weather-forecast-template">
+                    data-bind="source: history, events = {click :refreshData} " 
+                    data-template = "history-template">
                 </ul>
             </div>
         </div>
 
-        <script type="text/x-kendo-tmpl" id="weather-forecast-template">
-            <div class="template-holder">
-                <h1>#: stopName#</h1>
+            <!--<span class="weather-icon ${moreTransports[0]}"></span>--> <!--Да се добави МАЛКА снимка на всяко превозно стредство-->
+        <script type="text/x-kendo-tmpl" id="history-template">
+            <a class="template-holder">
                 <div>
+                    <h1>#: stopName#</h1>
 
                     <div class="position-left">
-                        #var split = takedAt.split(" ");#
                         <div>
                             <span class="weather-icon ${typeName}"/>
                         </div>
-                        <div class="timeTaken-info temperature high">Към #: split[1]#</div>
-                        <div class="timeTaken-info temperature low"> #: split[0]# </div>
+                        #var splited ;
+                        if (takedAt == null) {
+                            splited = ["неуточнено","време"]
+                        }
+                        else {
+                            splited = takedAt.split(" "); 
+                        }
+                        if (splited.length < 2) {
+                            splited = ["неуточнено","време"]
+                        }#
+                        <div class="timeTaken-info temperature high">Към #: splited[1]#</div>
+                        <div class="timeTaken-info temperature low"> #: splited[0]# </div>
                     </div>
 
                     <div class="position-left" style="padding-left:25px">
-                        <div class="timeTaken-info temperature high" > №#: mainNumber# #: mainTime#</div>
+                        
+                        <div class="timeTaken-info temperature high" >
+                            №#: mainNumber# #: mainTime#
+                        </div>
             
-                        #var moreTransports = more.split("s");
-                        console.log(moreTransports);
-            
-                        var tempNumber = "";
-                        var tempTime = "";
-                        for (var i = 1; i < moreTransports.length;i++) {
-                            var getTransportData = moreTransports[i].split("-");
-                            if (getTransportData.length > 1) {
-                                tempNumber = getTransportData[0];
-                                tempTime = getTransportData[1]; 
-                            }#
-                            <div class="timeTaken-info temperature high">
-                                <!--<span class="weather-icon ${moreTransports[0]}"></span>-->
-                                №#: tempNumber #
-                                в #: tempTime #</div>
-                        #}#
-                    </div>
-
-                </div>
-            </div>
-        </script>
-
-        <script type="text/x-kendo-tmpl" id="response-template">
-            <div>
-                <div class="position-left">
-                    #var split = takedAt.split(" ");#
-            
-                    <div class="weather-info date">#: split[1]#</div>
-                    <div class="weather-info date">#: split[0]#</div>
-
-                </div>
-
-                <div class="position-right train-list-element">
-                    <div class="weather-info temperature high">
-                        #: mainNumber#
-                    </div>
-                    <div class="weather-info temperature high">
-                        asddddddddd
+                        #if (more != "") {
+                            var moreTransports = more.split("s");
+                        
+                            var tempNumber = "";
+                            var tempTime = "";
+                            for (var i = 1; i < moreTransports.length;i++) {
+                                var getTransportData = moreTransports[i].split("-");
+                                if (getTransportData.length > 1) {
+                                    tempNumber = getTransportData[0];
+                                    tempTime = getTransportData[1]; 
+                                }#
+                                <div class="timeTaken-info temperature high">
+                                    №#: tempNumber #
+                                    в #: tempTime #</div>
+                            #}
+                        }#
                     </div>
                 </div>
-            </div>
-
-            <div class="position-left">
-                <div class="position-right">
-
-                    <span class="weather-info date">#: mainTime #</span>
-
-                </div>
-                <span class="weather-info date">#: mainTime #</span>
-                <span class="weather-info date">#: takedAt #</span>
-                <span class="weather-info date">#: mainNumber #</span>
-                <span class="weather-info date">#: more #</span>
-                <span class="weather-info date"># console.log(JSON.stringify(this))  #</span>
-            </div>
-            <div class="position-right">
-                <span class="weather-info temperature high">&{ id }<sup>dies deg ;</sup></span>
-                <span class="weather-info temperature low">dolar kydravi<sup>dies deg ;</sup></span>
-            </div>
-            <div class="position-center">
-                <span class="weather-icon ">dolar kydravi img</span>
-            </div>
+            </a>
         </script>
 
         <!--Layout-->
@@ -137,9 +108,9 @@
             <!--Footer-->
             <div data-role="footer">
                 <div data-role="tabstrip">
-                    <!--<a href="#tabstrip-weather" data-icon="globe">Weather</a>-->
-                    <a href="#tabstrip-home"   data-icon="home">Home</a>
-                    <a href="views/transports-view.html#tabstrip-transports"  data-icon="search">Transports</a>
+                    <a href="#tabstrip-home" data-icon="home">ИСТОРИЯ</a>
+                    <a href="views/transports-view.html#tabstrip-transports"  data-icon="search">ТЪРСЕНЕ</a>
+                    <a href="views/getLocation-view.html#tabstrip-getLocation"  data-icon="globe">НАМЕРИ МЕ</a>
                 </div>
             </div>
         </div>

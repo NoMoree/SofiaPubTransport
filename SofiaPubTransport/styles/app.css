@@ -1,7 +1,24 @@
-#category-info h1{
-    text-align:center;
+#category-info h1
+{
+    text-align: center;
 }
 
-#transportNumber-holder {
-    text-align:center;
+#transportNumber-holder
+{
+    text-align: center;
+}
+
+#tabstrip-getLocation .km-content .km-button{
+    color: #000;
+    width: 85%;
+    max-width: 300px;
+    line-height: 1.8em;
+    margin-top: 2%;
+}
+.big-button{
+    background-color: #fff;
+    color: #000;
+    width: 85%;
+    max-width: 300px;
+    line-height: 1.8em;
 }
